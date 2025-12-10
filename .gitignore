@@ -1,15 +1,33 @@
 # Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 
-# dependencies
-node_modules/
+# ========================================
+# SENSITIVE FILES - NEVER COMMIT!
+# ========================================
+.env
+.env.*
+!.env.example
+google-services.json
+GoogleService-Info.plist
 
+# ========================================
+# Dependencies
+# ========================================
+node_modules/
+.pnp
+.pnp.js
+
+# ========================================
 # Expo
+# ========================================
 .expo/
+.expo-shared/
 dist/
 web-build/
 expo-env.d.ts
 
+# ========================================
 # Native
+# ========================================
 .kotlin/
 *.orig.*
 *.jks
@@ -17,25 +35,98 @@ expo-env.d.ts
 *.p12
 *.key
 *.mobileprovision
+*.hprof
 
+# iOS
+ios/
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata/
+*.xccheckout
+*.moved-aside
+DerivedData
+*.hmap
+*.ipa
+*.xcuserstate
+ios/.xcode.env.local
+
+# Android
+android/
+*.apk
+*.aab
+*.ap_
+*.dex
+.gradle/
+local.properties
+*.iml
+.idea/
+.gradle
+build/
+captures/
+.externalNativeBuild
+.cxx/
+
+# ========================================
 # Metro
+# ========================================
 .metro-health-check*
 
-# debug
+# ========================================
+# Debug & Logs
+# ========================================
 npm-debug.*
 yarn-debug.*
 yarn-error.*
+*.log
 
+# ========================================
 # macOS
+# ========================================
 .DS_Store
 *.pem
 
-# local env files
-.env*.local
-
-# typescript
+# ========================================
+# TypeScript
+# ========================================
 *.tsbuildinfo
 
-# generated native folders
-/ios
-/android
+# ========================================
+# Testing
+# ========================================
+coverage/
+.nyc_output/
+
+# ========================================
+# VS Code
+# ========================================
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# ========================================
+# Temporary Files
+# ========================================
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# ========================================
+# Build Output
+# ========================================
+dist/
+build/
+out/
+
+# ========================================
+# Documentation (Only README.md allowed)
+# ========================================
+*.md
+!README.md
