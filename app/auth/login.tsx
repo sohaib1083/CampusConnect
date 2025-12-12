@@ -1,81 +1,182 @@
 import React, { useState } from 'react';
-import { StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Alert } from 'react-native';
-import { Text, View } from '@/components/Themed';
-import { FontAwesome } from '@expo/vector-icons';
+import { 
+  StyleSheet, 
+  TextInput, 
+  TouchableOpacity, 
+  KeyboardAvoidingView, 
+  Platform, 
+  Alert, 
+  ActivityIndicator,
+  ScrollView,
+  View,
+  Text,
+  Dimensions
+} from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { useAuth } from '@/contexts/SimpleFirebaseAuthContext';
+import { Theme } from '@/constants/Theme';
+
+const { width: screenWidth } = Dimensions.get('window');
 
 /**
- * LoginScreen - Simple hardcoded authentication
- * Username: abc
- * Password: abc
+ * Modern LoginScreen - Beautiful gradient design with smooth animations
  */
 export default function LoginScreen() {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  
+  const { login } = useAuth();
 
-  const handleLogin = () => {
-    // Hardcoded credentials
-    if (username === 'abc' && password === 'abc') {
-      // Success - navigate to home
-      router.replace('/(tabs)');
-    } else {
-      Alert.alert(
-        'Login Failed',
-        'Invalid credentials. Use:\nUsername: abc\nPassword: abc',
-        [{ text: 'OK' }]
-      );
+  const handleEmailLogin = async () => {
+    if (!email || !password) {
+      Alert.alert('Required Fields', 'Please fill in all fields to continue');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await login(email, password);
+      router.replace('/main');
+    } catch (error: any) {
+      Alert.alert('Login Failed', error.message || 'Please check your credentials and try again');
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  const handleSignUp = () => {
+    router.push('/auth/signup');
+  };
+
   return (
-    <KeyboardAvoidingView 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
-    >
-      <View style={styles.content}>
-        <View style={styles.header}>
-          <FontAwesome name="graduation-cap" size={80} color="#2563eb" />
-          <Text style={styles.title}>CampusConnect AI</Text>
-          <Text style={styles.subtitle}>Sign in to continue</Text>
-        </View>
+    <View style={styles.container}>
+      <LinearGradient
+        colors={[Theme.colors.primary, Theme.colors.secondary, Theme.colors.primaryLight]}
+        style={styles.backgroundGradient}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      >
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.keyboardView}
+        >
+          <ScrollView 
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+            bounces={false}
+          >
+            {/* Modern Header */}
+            <View style={styles.header}>
+              <View style={styles.logoContainer}>
+                <LinearGradient
+                  colors={['rgba(255,255,255,0.3)', 'rgba(255,255,255,0.1)']}
+                  style={styles.logoGradient}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                >
+                  <Ionicons name="school" size={50} color={Theme.colors.textInverse} />
+                </LinearGradient>
+              </View>
+              <Text style={styles.title}>CampusConnect</Text>
+              <Text style={styles.subtitle}>Your AI-powered campus companion</Text>
+            </View>
 
-        <View style={styles.form}>
-          <View style={styles.inputContainer}>
-            <FontAwesome name="user" size={20} color="#666" style={styles.icon} />
-            <TextInput
-              style={styles.input}
-              placeholder="Username"
-              value={username}
-              onChangeText={setUsername}
-              autoCapitalize="none"
-            />
-          </View>
+            {/* Modern Form Card */}
+            <View style={styles.formCard}>
+              <View style={styles.formHeader}>
+                <Text style={styles.formTitle}>Welcome Back</Text>
+                <Text style={styles.formSubtitle}>Sign in to continue your campus journey</Text>
+              </View>
 
-          <View style={styles.inputContainer}>
-            <FontAwesome name="lock" size={20} color="#666" style={styles.icon} />
-            <TextInput
-              style={styles.input}
-              placeholder="Password"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-            />
-          </View>
+              {/* Email Input */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Email Address</Text>
+                <View style={styles.inputContainer}>
+                  <View style={styles.inputIconContainer}>
+                    <Ionicons name="mail" size={20} color={Theme.colors.primary} />
+                  </View>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Enter your email"
+                    placeholderTextColor={Theme.colors.textSecondary}
+                    value={email}
+                    onChangeText={setEmail}
+                    autoCapitalize="none"
+                    keyboardType="email-address"
+                    autoComplete="email"
+                  />
+                </View>
+              </View>
 
-          <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-            <Text style={styles.loginButtonText}>Sign In</Text>
-            <FontAwesome name="arrow-right" size={18} color="#fff" style={styles.buttonIcon} />
-          </TouchableOpacity>
+              {/* Password Input */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Password</Text>
+                <View style={styles.inputContainer}>
+                  <View style={styles.inputIconContainer}>
+                    <Ionicons name="lock-closed" size={20} color={Theme.colors.primary} />
+                  </View>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Enter your password"
+                    placeholderTextColor={Theme.colors.textSecondary}
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry={!showPassword}
+                    autoComplete="password"
+                  />
+                  <TouchableOpacity
+                    style={styles.passwordToggle}
+                    onPress={() => setShowPassword(!showPassword)}
+                  >
+                    <Ionicons 
+                      name={showPassword ? "eye-off" : "eye"} 
+                      size={20} 
+                      color={Theme.colors.textSecondary} 
+                    />
+                  </TouchableOpacity>
+                </View>
+              </View>
 
-          <View style={styles.infoBox}>
-            <FontAwesome name="info-circle" size={16} color="#2563eb" style={styles.infoIcon} />
-            <Text style={styles.infoText}>
-              Demo credentials:{'\n'}Username: abc{'\n'}Password: abc
-            </Text>
-          </View>
-        </View>
-      </View>
-    </KeyboardAvoidingView>
+              {/* Sign In Button */}
+              <TouchableOpacity 
+                style={[styles.signInButton, isLoading && styles.signInButtonDisabled]} 
+                onPress={handleEmailLogin}
+                disabled={isLoading}
+                activeOpacity={0.8}
+              >
+                <LinearGradient
+                  colors={[Theme.colors.primary, Theme.colors.secondary]}
+                  style={styles.signInGradient}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                >
+                  {isLoading ? (
+                    <ActivityIndicator color={Theme.colors.textInverse} size="small" />
+                  ) : (
+                    <>
+                      <Text style={styles.signInButtonText}>Sign In</Text>
+                      <Ionicons name="arrow-forward" size={20} color={Theme.colors.textInverse} />
+                    </>
+                  )}
+                </LinearGradient>
+              </TouchableOpacity>
+
+              {/* Sign Up Link */}
+              <View style={styles.signUpContainer}>
+                <Text style={styles.signUpText}>Don't have an account? </Text>
+                <TouchableOpacity onPress={handleSignUp}>
+                  <Text style={styles.signUpLink}>Sign Up</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </LinearGradient>
+    </View>
   );
 }
 
@@ -83,86 +184,136 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  content: {
+  backgroundGradient: {
     flex: 1,
-    padding: 20,
-    justifyContent: 'center',
+  },
+  keyboardView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingHorizontal: Theme.spacing.lg,
+    paddingVertical: Theme.spacing.xl,
   },
   header: {
     alignItems: 'center',
-    marginBottom: 50,
+    marginBottom: Theme.spacing.xl * 2,
+    paddingTop: Theme.spacing.xl,
+  },
+  logoContainer: {
+    marginBottom: Theme.spacing.lg,
+  },
+  logoGradient: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...Theme.shadows.lg,
   },
   title: {
-    fontSize: 36,
-    fontWeight: 'bold',
-    marginTop: 20,
-    marginBottom: 10,
-    color: '#1e293b',
+    fontSize: Theme.typography.h1.fontSize,
+    fontWeight: Theme.typography.h1.fontWeight,
+    color: Theme.colors.textInverse,
+    marginBottom: Theme.spacing.xs,
+    textAlign: 'center',
   },
   subtitle: {
-    fontSize: 16,
-    opacity: 0.7,
+    fontSize: Theme.typography.body1.fontSize,
+    color: 'rgba(255,255,255,0.8)',
+    textAlign: 'center',
+    lineHeight: Theme.typography.body1.lineHeight,
   },
-  form: {
-    width: '100%',
+  formCard: {
+    backgroundColor: Theme.colors.surface,
+    borderRadius: Theme.borderRadius.xl,
+    padding: Theme.spacing.xl,
+    ...Theme.shadows.lg,
+    marginBottom: Theme.spacing.xl,
+  },
+  formHeader: {
+    marginBottom: Theme.spacing.xl,
+    alignItems: 'center',
+  },
+  formTitle: {
+    fontSize: Theme.typography.h3.fontSize,
+    fontWeight: Theme.typography.h3.fontWeight,
+    color: Theme.colors.text,
+    marginBottom: Theme.spacing.xs,
+  },
+  formSubtitle: {
+    fontSize: Theme.typography.body2.fontSize,
+    color: Theme.colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: Theme.typography.body2.lineHeight,
+  },
+  inputGroup: {
+    marginBottom: Theme.spacing.lg,
+  },
+  inputLabel: {
+    fontSize: Theme.typography.body2.fontSize,
+    fontWeight: '600',
+    color: Theme.colors.text,
+    marginBottom: Theme.spacing.sm,
+    marginLeft: Theme.spacing.xs,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f8f9fa',
-    borderRadius: 12,
-    marginBottom: 16,
-    paddingHorizontal: 16,
+    backgroundColor: Theme.colors.background,
+    borderRadius: Theme.borderRadius.md,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: Theme.colors.border,
+    overflow: 'hidden',
   },
-  icon: {
-    marginRight: 12,
+  inputIconContainer: {
+    padding: Theme.spacing.md,
+    backgroundColor: Theme.colors.primaryLight + '20',
   },
   input: {
     flex: 1,
-    height: 54,
-    fontSize: 16,
+    padding: Theme.spacing.md,
+    fontSize: Theme.typography.body1.fontSize,
+    color: Theme.colors.text,
   },
-  loginButton: {
-    backgroundColor: '#2563eb',
+  passwordToggle: {
+    padding: Theme.spacing.md,
+  },
+  signInButton: {
+    borderRadius: Theme.borderRadius.lg,
+    overflow: 'hidden',
+    marginBottom: Theme.spacing.lg,
+    marginTop: Theme.spacing.lg,
+    ...Theme.shadows.md,
+  },
+  signInButtonDisabled: {
+    opacity: 0.7,
+  },
+  signInGradient: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 18,
-    borderRadius: 12,
-    marginTop: 10,
-    marginBottom: 24,
-    shadowColor: '#2563eb',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
+    padding: Theme.spacing.lg,
+    gap: Theme.spacing.sm,
   },
-  loginButtonText: {
-    color: '#fff',
-    fontSize: 18,
+  signInButtonText: {
+    fontSize: Theme.typography.body1.fontSize,
     fontWeight: '600',
-    marginRight: 10,
+    color: Theme.colors.textInverse,
   },
-  buttonIcon: {
-    marginLeft: 8,
-  },
-  infoBox: {
+  signUpContainer: {
     flexDirection: 'row',
-    backgroundColor: '#eff6ff',
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'flex-start',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: Theme.spacing.md,
   },
-  infoIcon: {
-    marginRight: 12,
-    marginTop: 2,
+  signUpText: {
+    fontSize: Theme.typography.body2.fontSize,
+    color: Theme.colors.textSecondary,
   },
-  infoText: {
-    flex: 1,
-    fontSize: 14,
-    color: '#1e40af',
-    lineHeight: 22,
+  signUpLink: {
+    fontSize: Theme.typography.body2.fontSize,
+    color: Theme.colors.primary,
+    fontWeight: '600',
   },
 });

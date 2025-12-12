@@ -31,12 +31,12 @@ export default function OnboardingScreen() {
     if (currentIndex < onboardingScreens.length - 1) {
       setCurrentIndex(currentIndex + 1);
     } else {
-      router.replace('/(tabs)');
+      router.replace('/main');
     }
   };
 
   const handleSkip = () => {
-    router.replace('/(tabs)');
+    router.replace('/main');
   };
 
   const currentScreen = onboardingScreens[currentIndex];

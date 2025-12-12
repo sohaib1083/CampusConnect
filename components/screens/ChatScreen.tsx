@@ -1,17 +1,18 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { StyleSheet, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import { StyleSheet, KeyboardAvoidingView, Platform, Alert, View, Text } from 'react-native';
 import { GiftedChat, IMessage, Send, Bubble, InputToolbar } from 'react-native-gifted-chat';
-import { View } from '@/components/Themed';
-import { FontAwesome } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { FontAwesome, Ionicons } from '@expo/vector-icons';
 import { askGroq, GroqMessage } from '@/services/groqApi';
 import { useAuth } from '@/contexts/SimpleFirebaseAuthContext';
 import { chatLoggingService } from '@/services/chatLoggingService';
+import { Theme } from '@/constants/Theme';
 
 /**
- * ChatScreen - Full chat interface using react-native-gifted-chat
- * Connected to Groq API for AI responses
+ * Modern ChatScreen - Beautiful AI chat interface with gradient design
+ * Connected to Groq API for AI responses with complete chat logging
  */
-function ChatScreen() {
+const ChatScreen: React.FC = () => {
   const [messages, setMessages] = useState<IMessage[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [conversationHistory, setConversationHistory] = useState<GroqMessage[]>([]);
@@ -144,23 +145,30 @@ function ChatScreen() {
     } finally {
       setIsTyping(false);
     }
-  }, [conversationHistory]);
+  }, [conversationHistory, isAuthenticated, user, currentConversationId]);
 
   /**
-   * Customize send button
+   * Customize send button with gradient background
    */
   const renderSend = (props: any) => {
     return (
       <Send {...props}>
-        <View style={styles.sendButton}>
-          <FontAwesome name="send" size={20} color="#2563eb" />
+        <View style={styles.sendButtonContainer}>
+          <LinearGradient
+            colors={[Theme.colors.primary, Theme.colors.secondary] as [string, string]}
+            style={styles.sendButton}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <Ionicons name="send" size={20} color={Theme.colors.textInverse} />
+          </LinearGradient>
         </View>
       </Send>
     );
   };
 
   /**
-   * Customize chat bubbles with rounded corners and soft colors
+   * Customize chat bubbles with modern design
    */
   const renderBubble = (props: any) => {
     return (
@@ -168,26 +176,33 @@ function ChatScreen() {
         {...props}
         wrapperStyle={{
           right: {
-            backgroundColor: '#2563eb',
-            borderRadius: 16,
-            padding: 4,
+            backgroundColor: Theme.colors.primary,
+            borderRadius: Theme.borderRadius.xl,
+            padding: Theme.spacing.xs,
+            marginVertical: Theme.spacing.xs,
+            ...Theme.shadows.sm,
           },
           left: {
-            backgroundColor: '#f1f5f9',
-            borderRadius: 16,
-            padding: 4,
+            backgroundColor: Theme.colors.surface,
+            borderRadius: Theme.borderRadius.xl,
+            padding: Theme.spacing.xs,
+            marginVertical: Theme.spacing.xs,
+            borderWidth: 1,
+            borderColor: Theme.colors.border,
           },
         }}
         textStyle={{
           right: {
-            color: '#fff',
-            fontSize: 16,
-            lineHeight: 22,
+            color: Theme.colors.textInverse,
+            fontSize: Theme.typography.body1.fontSize,
+            lineHeight: Theme.typography.body1.lineHeight,
+            fontWeight: Theme.typography.body1.fontWeight,
           },
           left: {
-            color: '#1e293b',
-            fontSize: 16,
-            lineHeight: 22,
+            color: Theme.colors.text,
+            fontSize: Theme.typography.body1.fontSize,
+            lineHeight: Theme.typography.body1.lineHeight,
+            fontWeight: Theme.typography.body1.fontWeight,
           },
         }}
       />
@@ -195,7 +210,7 @@ function ChatScreen() {
   };
 
   /**
-   * Customize input toolbar
+   * Customize input toolbar with modern styling
    */
   const renderInputToolbar = (props: any) => {
     return (
@@ -209,44 +224,101 @@ function ChatScreen() {
 
   return (
     <View style={styles.container}>
-      <GiftedChat
-        messages={messages}
-        onSend={messages => onSend(messages)}
-        user={{
-          _id: 1,
-        }}
-        renderSend={renderSend}
-        renderBubble={renderBubble}
-        renderInputToolbar={renderInputToolbar}
-        isTyping={isTyping}
-        timeTextStyle={{
-          left: { color: '#64748b', fontSize: 12 },
-          right: { color: '#e0e7ff', fontSize: 12 },
-        }}
-      />
-      {Platform.OS === 'android' && <KeyboardAvoidingView behavior="padding" />}
+      {/* Chat Interface */}
+      <View style={styles.chatContainer}>
+        <GiftedChat
+          messages={messages}
+          onSend={messages => onSend(messages)}
+          user={{
+            _id: 1,
+          }}
+          renderSend={renderSend}
+          renderBubble={renderBubble}
+          renderInputToolbar={renderInputToolbar}
+          isTyping={isTyping}
+          timeTextStyle={{
+            left: { color: Theme.colors.textSecondary, fontSize: Theme.typography.caption.fontSize },
+            right: { color: Theme.colors.textInverse, fontSize: Theme.typography.caption.fontSize, opacity: 0.8 },
+          }}
+        />
+        {Platform.OS === 'android' && <KeyboardAvoidingView behavior="padding" />}
+      </View>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: Theme.colors.background,
   },
-  sendButton: {
+  header: {
+    paddingTop: 45,
+    paddingBottom: Theme.spacing.md,
+    paddingHorizontal: Theme.spacing.lg,
+    ...Theme.shadows.md,
+  },
+  headerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  menuButton: {
+    padding: Theme.spacing.sm,
+  },
+  headerTitleContainer: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  headerTitle: {
+    fontSize: Theme.typography.h3.fontSize,
+    fontWeight: Theme.typography.h3.fontWeight,
+    color: Theme.colors.textInverse,
+    marginBottom: 2,
+  },
+  headerSubtitle: {
+    fontSize: Theme.typography.caption.fontSize,
+    fontWeight: Theme.typography.caption.fontWeight,
+    color: Theme.colors.textInverse,
+    opacity: 0.9,
+  },
+  statusIndicator: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 40,
+  },
+  onlineIndicator: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    borderWidth: 2,
+    borderColor: Theme.colors.textInverse,
+  },
+  chatContainer: {
+    flex: 1,
+    backgroundColor: Theme.colors.background,
+  },
+  sendButtonContainer: {
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 10,
-    marginBottom: 8,
+    marginRight: Theme.spacing.md,
+    marginBottom: Theme.spacing.sm,
+  },
+  sendButton: {
     width: 40,
     height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    ...Theme.shadows.sm,
   },
   inputToolbar: {
     borderTopWidth: 1,
-    borderTopColor: '#e2e8f0',
-    backgroundColor: '#fff',
-    paddingVertical: 4,
+    borderTopColor: Theme.colors.border,
+    backgroundColor: Theme.colors.surface,
+    paddingVertical: Theme.spacing.sm,
+    paddingHorizontal: Theme.spacing.md,
+    minHeight: 60,
   },
   inputPrimary: {
     alignItems: 'center',

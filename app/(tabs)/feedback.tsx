@@ -6,38 +6,44 @@ import {
   ScrollView,
   Alert,
   KeyboardAvoidingView,
-  Platform
+  Platform,
+  ActivityIndicator
 } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { FontAwesome } from '@expo/vector-icons';
+import { useAuth } from '@/contexts/SimpleFirebaseAuthContext';
+import { feedbackLoggingService, FeedbackEntry } from '@/services/feedbackLoggingService';
 
 /**
  * FeedbackScreen - Allow users to rate and provide feedback
- * Includes star rating, text comments, and submit functionality
  */
-export default function FeedbackScreen() {
+function FeedbackScreen() {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
+  const [category, setCategory] = useState<FeedbackEntry['category']>('general');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const { user, isAuthenticated } = useAuth();
 
-  /**
-   * Handle star rating selection
-   */
   const handleStarPress = (selectedRating: number) => {
     setRating(selectedRating);
   };
 
-  /**
-   * Handle feedback submission
-   */
+  const handleCategoryPress = (selectedCategory: FeedbackEntry['category']) => {
+    setCategory(selectedCategory);
+  };
+
   const handleSubmit = async () => {
-    // Validate rating
+    if (!isAuthenticated || !user) {
+      Alert.alert('Please Login', 'You need to be logged in to submit feedback.');
+      return;
+    }
+
     if (rating === 0) {
       Alert.alert('Rating Required', 'Please select a star rating before submitting.');
       return;
     }
 
-    // Validate comment (optional but recommended)
     if (comment.trim().length === 0) {
       Alert.alert(
         'Add Comments?',
@@ -53,20 +59,22 @@ export default function FeedbackScreen() {
     await submitFeedback();
   };
 
-  /**
-   * Submit feedback to backend
-   */
   const submitFeedback = async () => {
+    if (!user) return;
+
     setIsSubmitting(true);
 
     try {
-      // TODO: Integrate with Firebase or your backend API
-      // await submitFeedbackToBackend({ rating, comment });
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      console.log('Feedback submitted:', { rating, comment, timestamp: new Date() });
+      await feedbackLoggingService.submitFeedback(
+        user.uid,
+        rating,
+        comment.trim(),
+        category,
+        {
+          appVersion: '1.0.0',
+          userAgent: 'CampusConnect Mobile App',
+        }
+      );
 
       Alert.alert(
         'Thank You! 🎉',
@@ -77,38 +85,35 @@ export default function FeedbackScreen() {
             onPress: () => {
               setRating(0);
               setComment('');
+              setCategory('general');
             }
           }
         ]
       );
-
     } catch (error) {
       console.error('Feedback submission error:', error);
       Alert.alert(
         'Submission Failed',
-        'Unable to submit feedback. Please try again later.'
+        'There was an error submitting your feedback. Please try again later.'
       );
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  /**
-   * Render star rating component
-   */
   const renderStars = () => {
     return (
       <View style={styles.starsContainer}>
         {[1, 2, 3, 4, 5].map((star) => (
           <TouchableOpacity
             key={star}
+            style={styles.star}
             onPress={() => handleStarPress(star)}
-            style={styles.starButton}
             disabled={isSubmitting}
           >
             <FontAwesome
               name={star <= rating ? 'star' : 'star-o'}
-              size={44}
+              size={40}
               color={star <= rating ? '#f59e0b' : '#cbd5e1'}
             />
           </TouchableOpacity>
@@ -117,81 +122,118 @@ export default function FeedbackScreen() {
     );
   };
 
-  /**
-   * Get rating text based on selected stars
-   */
-  const getRatingText = () => {
+  const getRatingDescription = () => {
     switch (rating) {
-      case 1: return 'Poor';
-      case 2: return 'Fair';
-      case 3: return 'Good';
-      case 4: return 'Very Good';
-      case 5: return 'Excellent';
+      case 1: return 'Poor 😞';
+      case 2: return 'Fair 😐';
+      case 3: return 'Good 😊';
+      case 4: return 'Very Good 😄';
+      case 5: return 'Excellent 🤩';
       default: return 'Tap a star to rate';
     }
   };
+
+  const categories = [
+    { key: 'general' as const, label: 'General', icon: 'comment' },
+    { key: 'chat' as const, label: 'Chat AI', icon: 'comments' },
+    { key: 'ui' as const, label: 'Interface', icon: 'mobile' },
+    { key: 'performance' as const, label: 'Performance', icon: 'tachometer' },
+    { key: 'feature_request' as const, label: 'Feature', icon: 'lightbulb-o' },
+    { key: 'bug_report' as const, label: 'Bug Report', icon: 'bug' },
+  ];
+
+  if (!isAuthenticated) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.loginPrompt}>
+          <FontAwesome name="sign-in" size={60} color="#2563eb" />
+          <Text style={styles.loginTitle}>Login Required</Text>
+          <Text style={styles.loginText}>Please login to submit feedback</Text>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <KeyboardAvoidingView 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
-      <ScrollView 
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-      >
+      <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
           <View style={styles.iconContainer}>
-            <FontAwesome name="comment" size={50} color="#2563eb" />
+            <FontAwesome name="star" size={50} color="#f59e0b" />
           </View>
-          <Text style={styles.title}>How was your experience?</Text>
-          <Text style={styles.subtitle}>
-            Your feedback helps us improve CampusConnect AI
-          </Text>
+          <Text style={styles.title}>Share Your Feedback</Text>
+          <Text style={styles.subtitle}>Help us improve CampusConnect AI</Text>
         </View>
 
         <View style={styles.ratingSection}>
+          <Text style={styles.sectionTitle}>How would you rate your experience?</Text>
           {renderStars()}
-          <Text style={styles.ratingText}>{getRatingText()}</Text>
+          <Text style={styles.ratingDescription}>{getRatingDescription()}</Text>
+        </View>
+
+        <View style={styles.categorySection}>
+          <Text style={styles.sectionTitle}>Category</Text>
+          <View style={styles.categoryGrid}>
+            {categories.map((cat) => (
+              <TouchableOpacity
+                key={cat.key}
+                style={[
+                  styles.categoryButton,
+                  category === cat.key && styles.categoryButtonSelected
+                ]}
+                onPress={() => handleCategoryPress(cat.key)}
+                disabled={isSubmitting}
+              >
+                <FontAwesome
+                  name={cat.icon as any}
+                  size={16}
+                  color={category === cat.key ? '#2563eb' : '#64748b'}
+                />
+                <Text style={[
+                  styles.categoryText,
+                  category === cat.key && styles.categoryTextSelected
+                ]}>
+                  {cat.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
 
         <View style={styles.commentSection}>
-          <Text style={styles.label}>Comments (Optional)</Text>
+          <Text style={styles.sectionTitle}>Comments (Optional)</Text>
           <TextInput
-            style={styles.textInput}
-            placeholder="Tell us more about your experience..."
-            placeholderTextColor="#94a3b8"
-            value={comment}
-            onChangeText={setComment}
+            style={styles.commentInput}
+            placeholder="Share your thoughts, suggestions, or report issues..."
             multiline
             numberOfLines={6}
-            textAlignVertical="top"
+            value={comment}
+            onChangeText={setComment}
             editable={!isSubmitting}
           />
         </View>
 
-        <TouchableOpacity
-          style={[
-            styles.submitButton,
-            (rating === 0 || isSubmitting) && styles.submitButtonDisabled
-          ]}
+        <TouchableOpacity 
+          style={[styles.submitButton, isSubmitting && styles.submitButtonDisabled]}
           onPress={handleSubmit}
-          disabled={rating === 0 || isSubmitting}
+          disabled={isSubmitting}
         >
           {isSubmitting ? (
-            <Text style={styles.submitButtonText}>Submitting...</Text>
+            <ActivityIndicator color="#fff" />
           ) : (
             <>
-              <FontAwesome name="paper-plane" size={18} color="#fff" style={styles.buttonIcon} />
+              <FontAwesome name="paper-plane" size={20} color="#fff" />
               <Text style={styles.submitButtonText}>Submit Feedback</Text>
             </>
           )}
         </TouchableOpacity>
 
-        <View style={styles.infoBox}>
-          <FontAwesome name="info-circle" size={16} color="#2563eb" style={styles.infoIcon} />
+        <View style={styles.footer}>
           <Text style={styles.infoText}>
-            Your feedback is anonymous and will be used to enhance the app experience.
+            Your feedback helps us improve the app experience for all users.
           </Text>
         </View>
       </ScrollView>
@@ -209,103 +251,140 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: 30,
     marginTop: 20,
   },
   iconContainer: {
     marginBottom: 20,
   },
   title: {
-    fontSize: 26,
+    fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 10,
-    textAlign: 'center',
+    marginBottom: 8,
     color: '#1e293b',
   },
   subtitle: {
-    fontSize: 15,
-    opacity: 0.7,
+    fontSize: 16,
+    opacity: 0.6,
     textAlign: 'center',
-    paddingHorizontal: 20,
   },
   ratingSection: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: 30,
+    padding: 20,
+    backgroundColor: '#f8f9fa',
+    borderRadius: 16,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 20,
+    color: '#1e293b',
   },
   starsContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     marginBottom: 16,
   },
-  starButton: {
+  star: {
+    marginHorizontal: 8,
     padding: 8,
   },
-  ratingText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#475569',
+  ratingDescription: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#2563eb',
+  },
+  categorySection: {
+    marginBottom: 30,
+  },
+  categoryGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  categoryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    backgroundColor: '#fff',
+    minWidth: 100,
+  },
+  categoryButtonSelected: {
+    borderColor: '#2563eb',
+    backgroundColor: '#eff6ff',
+  },
+  categoryText: {
+    marginLeft: 8,
+    fontSize: 14,
+    color: '#64748b',
+  },
+  categoryTextSelected: {
+    color: '#2563eb',
+    fontWeight: '500',
   },
   commentSection: {
     marginBottom: 30,
   },
-  label: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 12,
-    color: '#1e293b',
-  },
-  textInput: {
-    backgroundColor: '#f8fafc',
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 15,
+  commentInput: {
     borderWidth: 1,
     borderColor: '#e2e8f0',
-    minHeight: 140,
-    color: '#1e293b',
+    borderRadius: 12,
+    padding: 16,
+    fontSize: 16,
+    textAlignVertical: 'top',
+    minHeight: 120,
   },
   submitButton: {
-    backgroundColor: '#2563eb',
+    backgroundColor: '#10b981',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 18,
     borderRadius: 12,
     marginBottom: 20,
-    shadowColor: '#2563eb',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
   },
   submitButtonDisabled: {
-    backgroundColor: '#94a3b8',
-    shadowOpacity: 0,
-    elevation: 0,
-  },
-  buttonIcon: {
-    marginRight: 10,
+    opacity: 0.6,
   },
   submitButtonText: {
     color: '#fff',
-    fontSize: 17,
+    fontSize: 18,
     fontWeight: '600',
+    marginLeft: 12,
   },
-  infoBox: {
-    flexDirection: 'row',
-    backgroundColor: '#eff6ff',
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'flex-start',
-  },
-  infoIcon: {
-    marginRight: 12,
-    marginTop: 2,
+  footer: {
+    alignItems: 'center',
+    paddingTop: 20,
   },
   infoText: {
-    flex: 1,
-    fontSize: 13,
-    color: '#1e40af',
+    fontSize: 14,
+    opacity: 0.6,
+    textAlign: 'center',
     lineHeight: 20,
   },
+  loginPrompt: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 40,
+  },
+  loginTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginTop: 20,
+    marginBottom: 10,
+    color: '#1e293b',
+  },
+  loginText: {
+    fontSize: 16,
+    opacity: 0.6,
+    textAlign: 'center',
+  },
 });
+
+export default FeedbackScreen;

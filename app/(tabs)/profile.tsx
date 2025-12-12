@@ -1,35 +1,113 @@
-import React from 'react';
-import { StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, ScrollView, TouchableOpacity, Image, Alert, ActivityIndicator } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { FontAwesome } from '@expo/vector-icons';
+import { router } from 'expo-router';
+import { useAuth } from '@/contexts/SimpleFirebaseAuthContext';
+import { chatLoggingService } from '@/services/chatLoggingService';
+import { feedbackLoggingService } from '@/services/feedbackLoggingService';
 
-export default function ProfileScreen() {
+function ProfileScreen() {
+  const { user, logout } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleLogout = async () => {
+    Alert.alert(
+      'Logout',
+      'Are you sure you want to logout?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Logout',
+          onPress: async () => {
+            setIsLoading(true);
+            try {
+              await logout();
+              router.replace('/');
+            } catch (error: any) {
+              Alert.alert('Error', 'Failed to logout. Please try again.');
+            } finally {
+              setIsLoading(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleEditProfile = () => {
+    // TODO: Navigate to edit profile screen
+    Alert.alert('Coming Soon', 'Edit profile feature will be available soon!');
+  };
+
+  const handleChatHistory = async () => {
+    if (!user) return;
+    
+    try {
+      const messages = await chatLoggingService.getUserChatHistory(user.uid, 10);
+      Alert.alert(
+        'Chat History',
+        `You have ${messages.length} recent chat messages.`
+      );
+    } catch (error) {
+      Alert.alert('Error', 'Failed to load chat history.');
+    }
+  };
+
+  const handleFeedbackHistory = async () => {
+    if (!user) return;
+    
+    try {
+      const feedback = await feedbackLoggingService.getUserFeedback(user.uid);
+      Alert.alert(
+        'Feedback History',
+        `You have submitted ${feedback.length} feedback entries.`
+      );
+    } catch (error) {
+      Alert.alert('Error', 'Failed to load feedback history.');
+    }
+  };
+
+  if (!user) {
+    return (
+      <View style={styles.container}>
+        <Text>Please login to view your profile</Text>
+      </View>
+    );
+  }
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <View style={styles.avatarContainer}>
-          <FontAwesome name="user-circle" size={80} color="#3498db" />
+          {user.photoURL ? (
+            <Image source={{ uri: user.photoURL }} style={styles.avatar} />
+          ) : (
+            <FontAwesome name="user-circle" size={80} color="#2563eb" />
+          )}
         </View>
-        <Text style={styles.name}>Student Name</Text>
-        <Text style={styles.email}>student@university.edu</Text>
-        <Text style={styles.id}>ID: 2024001234</Text>
+        <Text style={styles.name}>{user.displayName || 'Student'}</Text>
+        <Text style={styles.email}>{user.email}</Text>
+        {user.studentId && <Text style={styles.id}>ID: {user.studentId}</Text>}
       </View>
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Account</Text>
-        <TouchableOpacity style={styles.menuItem}>
+        <TouchableOpacity style={styles.menuItem} onPress={handleEditProfile}>
           <FontAwesome name="user" size={20} color="#666" />
           <Text style={styles.menuText}>Edit Profile</Text>
           <FontAwesome name="chevron-right" size={16} color="#ccc" />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.menuItem}>
+        <TouchableOpacity style={styles.menuItem} onPress={handleChatHistory}>
           <FontAwesome name="history" size={20} color="#666" />
           <Text style={styles.menuText}>Chat History</Text>
           <FontAwesome name="chevron-right" size={16} color="#ccc" />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.menuItem}>
-          <FontAwesome name="bookmark" size={20} color="#666" />
-          <Text style={styles.menuText}>Saved Items</Text>
+        <TouchableOpacity style={styles.menuItem} onPress={handleFeedbackHistory}>
+          <FontAwesome name="star" size={20} color="#666" />
+          <Text style={styles.menuText}>My Feedback</Text>
           <FontAwesome name="chevron-right" size={16} color="#ccc" />
         </TouchableOpacity>
       </View>
@@ -72,9 +150,19 @@ export default function ProfileScreen() {
         </TouchableOpacity>
       </View>
 
-      <TouchableOpacity style={styles.logoutButton}>
-        <FontAwesome name="sign-out" size={20} color="#e74c3c" />
-        <Text style={styles.logoutText}>Logout</Text>
+      <TouchableOpacity 
+        style={[styles.logoutButton, isLoading && styles.logoutButtonDisabled]}
+        onPress={handleLogout}
+        disabled={isLoading}
+      >
+        {isLoading ? (
+          <ActivityIndicator color="#e74c3c" />
+        ) : (
+          <>
+            <FontAwesome name="sign-out" size={20} color="#e74c3c" />
+            <Text style={styles.logoutText}>Logout</Text>
+          </>
+        )}
       </TouchableOpacity>
 
       <View style={styles.footer}>
@@ -95,6 +183,11 @@ const styles = StyleSheet.create({
   },
   avatarContainer: {
     marginBottom: 15,
+  },
+  avatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
   },
   name: {
     fontSize: 24,
@@ -142,6 +235,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: '#fee',
   },
+  logoutButtonDisabled: {
+    opacity: 0.6,
+  },
   logoutText: {
     fontSize: 16,
     fontWeight: '600',
@@ -157,3 +253,5 @@ const styles = StyleSheet.create({
     opacity: 0.4,
   },
 });
+
+export default ProfileScreen;

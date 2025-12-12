@@ -47,6 +47,15 @@ export default function TabLayout() {
         options={{
           title: 'Feedback',
           tabBarIcon: ({ color }) => <TabBarIcon name="star" color={color} />,
+          headerTitle: 'Feedback',
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'Profile',
+          tabBarIcon: ({ color }) => <TabBarIcon name="user" color={color} />,
+          headerTitle: 'Profile',
         }}
       />
     </Tabs>
