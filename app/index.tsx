@@ -373,9 +373,14 @@ const styles = StyleSheet.create({
     color: Theme.colors.textInverse,
     textAlign: 'center',
     marginBottom: Theme.spacing.sm,
-    textShadowColor: 'rgba(0,0,0,0.3)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 4,
+    // React Native compatible shadow
+    ...(Platform.OS === 'web' ? {
+      textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+    } : {
+      textShadowColor: 'rgba(0,0,0,0.3)',
+      textShadowOffset: { width: 0, height: 2 },
+      textShadowRadius: 4,
+    }),
   },
   heroSubtitle: {
     fontSize: 20,
@@ -403,9 +408,14 @@ const styles = StyleSheet.create({
     color: Theme.colors.textInverse,
     textAlign: 'center',
     marginBottom: Theme.spacing.xl,
-    textShadowColor: 'rgba(0,0,0,0.2)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
+    // React Native compatible shadow
+    ...(Platform.OS === 'web' ? {
+      textShadow: '0 1px 2px rgba(0,0,0,0.2)',
+    } : {
+      textShadowColor: 'rgba(0,0,0,0.2)',
+      textShadowOffset: { width: 0, height: 1 },
+      textShadowRadius: 2,
+    }),
   },
   featuresGrid: {
     flexDirection: 'row',

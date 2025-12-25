@@ -49,15 +49,16 @@ try {
 // Initialize Firestore
 export const db = getFirestore(app);
 
-// Initialize Analytics (web only - with environment check)
+// Initialize Analytics (web only - with environment check and API key validation)
 export let analytics: any = null;
-if (typeof window !== 'undefined') {
+if (typeof window !== 'undefined' && process.env.EXPO_PUBLIC_FIREBASE_API_KEY !== '***REMOVED_FOR_GITHUB***') {
   isSupported().then(supported => {
     if (supported) {
       analytics = getAnalytics(app);
     }
   }).catch(() => {
-    // Analytics not supported, keep null
+    // Analytics not supported or API key invalid, keep null
+    console.warn('Firebase Analytics not supported or API key invalid');
     analytics = null;
   });
 }

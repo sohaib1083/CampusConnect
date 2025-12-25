@@ -1,0 +1,278 @@
+/**
+ * CampusConnect Knowledge Base - Synthetic Dataset
+ * Comprehensive university information for Malaysian institutions
+ */
+
+export interface KnowledgeItem {
+  id: string;
+  category: string;
+  topic: string;
+  question: string;
+  answer: string;
+  keywords: string[];
+  importance: 'high' | 'medium' | 'low';
+}
+
+export const universityKnowledgeBase: KnowledgeItem[] = [
+  // ACADEMIC POLICIES & RULES
+  {
+    id: 'AP001',
+    category: 'Academic Policies',
+    topic: 'CGPA Requirements',
+    question: 'What is the minimum CGPA to avoid academic probation?',
+    answer: 'Students must maintain a minimum CGPA of 2.00 to remain in good academic standing. A CGPA below 2.00 results in academic probation. Students on probation have one semester to improve their CGPA to 2.00 or above, failing which they may face dismissal.',
+    keywords: ['cgpa', 'minimum', 'probation', 'academic standing', 'dismissal'],
+    importance: 'high'
+  },
+  {
+    id: 'AP002',
+    category: 'Academic Policies',
+    topic: 'Graduation Requirements',
+    question: 'What CGPA is required for graduation?',
+    answer: 'Students need a minimum CGPA of 2.00 to graduate. For honors classification: First Class (CGPA 3.67-4.00), Upper Second Class (CGPA 3.00-3.66), Lower Second Class (CGPA 2.50-2.99), and Pass (CGPA 2.00-2.49).',
+    keywords: ['graduation', 'cgpa', 'honors', 'first class', 'second class'],
+    importance: 'high'
+  },
+  {
+    id: 'AP003',
+    category: 'Academic Policies',
+    topic: 'Credit Hours',
+    question: 'How many credit hours are required for graduation?',
+    answer: 'Bachelor degree programs typically require 120-130 credit hours. Engineering programs may require up to 140 credit hours. Students must complete all core courses, major requirements, and electives as specified in their program structure.',
+    keywords: ['credit hours', 'graduation', 'bachelor', 'engineering', 'core courses'],
+    importance: 'high'
+  },
+  {
+    id: 'AP004',
+    category: 'Academic Policies',
+    topic: 'Course Withdrawal',
+    question: 'What is the deadline for course withdrawal?',
+    answer: 'Students can withdraw from courses without academic penalty before Week 10 of the semester. Withdrawal after this deadline results in a "W" grade. Late withdrawal requires approval from the Dean and may affect financial aid.',
+    keywords: ['withdrawal', 'deadline', 'week 10', 'w grade', 'dean approval'],
+    importance: 'medium'
+  },
+  {
+    id: 'AP005',
+    category: 'Academic Policies',
+    topic: 'Repeat Courses',
+    question: 'Can I repeat a failed course?',
+    answer: 'Yes, students can repeat failed courses (Grade F). The new grade replaces the previous grade in CGPA calculation. However, both grades appear on the transcript. Students can repeat a course maximum of 2 times.',
+    keywords: ['repeat course', 'failed', 'grade f', 'cgpa calculation', 'maximum attempts'],
+    importance: 'medium'
+  },
+
+  // REGISTRATION & ENROLLMENT
+  {
+    id: 'RE001',
+    category: 'Registration',
+    topic: 'Registration Dates',
+    question: 'When is course registration for Semester 1 2025?',
+    answer: 'Course registration for Semester 1 2025: Early Registration (May 15-30), Regular Registration (June 1-15), Late Registration (June 16-22 with penalty fee). New students register during orientation week.',
+    keywords: ['registration dates', 'semester 1', '2025', 'early registration', 'late registration'],
+    importance: 'high'
+  },
+  {
+    id: 'RE002',
+    category: 'Registration',
+    topic: 'Registration Process',
+    question: 'How do I register for courses?',
+    answer: 'Log into the Student Information System (SIS), select "Course Registration", choose your courses based on your study plan, ensure prerequisites are met, and submit registration. Payment must be completed within 7 days.',
+    keywords: ['course registration', 'sis', 'student information system', 'prerequisites', 'payment'],
+    importance: 'high'
+  },
+  {
+    id: 'RE003',
+    category: 'Registration',
+    topic: 'Credit Load',
+    question: 'What is the maximum credit load per semester?',
+    answer: 'Regular students can take 15-18 credit hours per semester. Students with CGPA 3.50 and above can take up to 21 credit hours. Minimum load is 12 credit hours for full-time status. Part-time students can take 6-11 credit hours.',
+    keywords: ['credit load', 'maximum', 'minimum', 'full-time', 'part-time'],
+    importance: 'medium'
+  },
+  {
+    id: 'RE004',
+    category: 'Registration',
+    topic: 'Add/Drop Period',
+    question: 'When can I add or drop courses?',
+    answer: 'Add/Drop period is during the first two weeks of semester. Adding courses requires instructor approval if class is full. Dropping during this period does not appear on transcript. 100% fee refund for dropped courses.',
+    keywords: ['add drop', 'first two weeks', 'instructor approval', 'fee refund'],
+    importance: 'medium'
+  },
+
+  // EXAMINATION INFORMATION
+  {
+    id: 'EX001',
+    category: 'Examinations',
+    topic: 'Final Exam Schedule',
+    question: 'When are final exams for Semester 1 2025?',
+    answer: 'Final examinations for Semester 1 2025 are scheduled from December 2-16, 2025. Exam timetables are published 4 weeks before exams. Students must check their individual exam schedule on SIS.',
+    keywords: ['final exams', 'december 2025', 'exam timetable', 'sis', 'semester 1'],
+    importance: 'high'
+  },
+  {
+    id: 'EX002',
+    category: 'Examinations',
+    topic: 'Exam Policies',
+    question: 'What items are allowed during exams?',
+    answer: 'Students must bring student ID and stationery. Calculators are allowed only if specified by instructor. Mobile phones, smartwatches, and electronic devices must be switched off. Programmable calculators are prohibited unless explicitly allowed.',
+    keywords: ['exam rules', 'student id', 'calculators', 'mobile phones', 'electronic devices'],
+    importance: 'medium'
+  },
+  {
+    id: 'EX003',
+    category: 'Examinations',
+    topic: 'Special Exams',
+    question: 'Can I take a special exam if I miss the final?',
+    answer: 'Special exams are granted only for medical emergencies, family bereavement, or other exceptional circumstances. Medical certificate or official documentation required. Application must be submitted within 3 days of missed exam.',
+    keywords: ['special exam', 'medical emergency', 'bereavement', 'medical certificate', 'application'],
+    importance: 'medium'
+  },
+  {
+    id: 'EX004',
+    category: 'Examinations',
+    topic: 'Grade Appeals',
+    question: 'How do I appeal my exam grade?',
+    answer: 'Grade appeals must be submitted within 2 weeks of grade publication. Submit appeal form to Academic Affairs with clear justification. Review committee examines the case. Final decision is communicated within 4 weeks.',
+    keywords: ['grade appeal', 'two weeks', 'academic affairs', 'review committee', 'final decision'],
+    importance: 'low'
+  },
+
+  // STUDENT SERVICES
+  {
+    id: 'SS001',
+    category: 'Student Services',
+    topic: 'Library Hours',
+    question: 'What are the library operating hours?',
+    answer: 'Main Library: Monday-Thursday (8:00 AM - 10:00 PM), Friday (8:00 AM - 12:00 PM, 2:30 PM - 10:00 PM), Saturday-Sunday (9:00 AM - 6:00 PM). 24-hour study areas available during exam periods.',
+    keywords: ['library hours', 'operating hours', 'study areas', 'exam periods', 'main library'],
+    importance: 'medium'
+  },
+  {
+    id: 'SS002',
+    category: 'Student Services',
+    topic: 'Financial Aid',
+    question: 'What financial aid options are available?',
+    answer: 'Financial aid includes PTPTN loans, scholarships, work-study programs, and emergency funds. Applications open in January for the following academic year. Maintain CGPA 2.50+ for aid continuation. Contact Student Affairs for guidance.',
+    keywords: ['financial aid', 'ptptn', 'scholarships', 'work-study', 'student affairs'],
+    importance: 'high'
+  },
+  {
+    id: 'SS003',
+    category: 'Student Services',
+    topic: 'Health Services',
+    question: 'Where can I get medical attention on campus?',
+    answer: 'Campus Health Center operates Monday-Friday (8:00 AM - 5:00 PM). Services include general consultation, first aid, health screening, and emergency care. For serious emergencies, contact Security (ext. 999) for ambulance.',
+    keywords: ['health center', 'medical attention', 'consultation', 'emergency', 'security'],
+    importance: 'medium'
+  },
+
+  // GRADUATION & CAREER
+  {
+    id: 'GC001',
+    category: 'Graduation',
+    topic: 'Convocation',
+    question: 'When is the next convocation ceremony?',
+    answer: 'Convocation ceremonies are held twice yearly - June and November. June 2025 convocation is scheduled for June 15-17. Students must apply for graduation by March 31 for June ceremony. Gown rental and photography services available.',
+    keywords: ['convocation', 'june 2025', 'graduation application', 'gown rental', 'photography'],
+    importance: 'high'
+  },
+  {
+    id: 'GC002',
+    category: 'Graduation',
+    topic: 'Transcript Requests',
+    question: 'How do I request official transcripts?',
+    answer: 'Official transcripts can be requested online through SIS or at Registrar Office. Processing time: 3-5 working days for online requests, same day for urgent requests (additional fee). Digital transcripts available for verified employers.',
+    keywords: ['official transcripts', 'registrar office', 'processing time', 'urgent requests', 'digital transcripts'],
+    importance: 'medium'
+  },
+
+  // FACILITIES & CAMPUS LIFE
+  {
+    id: 'FC001',
+    category: 'Facilities',
+    topic: 'WiFi Access',
+    question: 'How do I connect to campus WiFi?',
+    answer: 'Connect to "UniWiFi" network using your student ID and SIS password. Coverage available in all academic buildings, library, cafeterias, and dormitories. Guest WiFi available for visitors with daily access codes from IT Help Desk.',
+    keywords: ['wifi', 'uniwifi', 'student id', 'password', 'guest wifi'],
+    importance: 'medium'
+  },
+  {
+    id: 'FC002',
+    category: 'Facilities',
+    topic: 'Parking',
+    question: 'Where can I park on campus?',
+    answer: 'Student parking available in designated areas with valid parking permit. Annual parking permit: RM50 for motorcycles, RM100 for cars. Visitor parking: RM2/hour. Parking violations result in RM30 fine.',
+    keywords: ['parking', 'parking permit', 'annual fee', 'visitor parking', 'parking fine'],
+    importance: 'low'
+  },
+
+  // ACADEMIC CALENDAR
+  {
+    id: 'AC001',
+    category: 'Academic Calendar',
+    topic: 'Semester Dates',
+    question: 'What are the important dates for Semester 1 2025?',
+    answer: 'Semester 1 2025: Registration (June 1-15), Classes Begin (June 22), Mid-semester Break (August 10-18), Last Day of Classes (November 15), Study Week (November 18-22), Final Exams (December 2-16), Grade Publication (December 23).',
+    keywords: ['semester dates', 'registration', 'classes begin', 'mid semester break', 'final exams'],
+    importance: 'high'
+  },
+  {
+    id: 'AC002',
+    category: 'Academic Calendar',
+    topic: 'Public Holidays',
+    question: 'Which public holidays affect the academic calendar?',
+    answer: 'Classes are suspended during Malaysian public holidays including Hari Raya, Chinese New Year, Deepavali, Christmas, and Independence Day. State-specific holidays also apply. Holiday makeup classes may be scheduled if necessary.',
+    keywords: ['public holidays', 'hari raya', 'chinese new year', 'deepavali', 'makeup classes'],
+    importance: 'medium'
+  },
+
+  // STUDENT CONDUCT
+  {
+    id: 'SC001',
+    category: 'Student Conduct',
+    topic: 'Academic Integrity',
+    question: 'What constitutes academic misconduct?',
+    answer: 'Academic misconduct includes plagiarism, cheating, fabrication of data, unauthorized collaboration, and multiple submissions. Penalties range from warning to expulsion depending on severity. All suspected cases are investigated by Academic Integrity Committee.',
+    keywords: ['academic misconduct', 'plagiarism', 'cheating', 'penalties', 'integrity committee'],
+    importance: 'high'
+  },
+  {
+    id: 'SC002',
+    category: 'Student Conduct',
+    topic: 'Dress Code',
+    question: 'What is the campus dress code?',
+    answer: 'Business casual attire required in academic buildings. No sleeveless tops, shorts above knee length, or slippers allowed in lectures/labs. Formal attire required for presentations and official events. Religious and cultural dress respected.',
+    keywords: ['dress code', 'business casual', 'formal attire', 'presentations', 'religious dress'],
+    importance: 'low'
+  }
+];
+
+// Category-based organization for easier retrieval
+export const knowledgeCategories = {
+  'Academic Policies': universityKnowledgeBase.filter(item => item.category === 'Academic Policies'),
+  'Registration': universityKnowledgeBase.filter(item => item.category === 'Registration'),
+  'Examinations': universityKnowledgeBase.filter(item => item.category === 'Examinations'),
+  'Student Services': universityKnowledgeBase.filter(item => item.category === 'Student Services'),
+  'Graduation': universityKnowledgeBase.filter(item => item.category === 'Graduation'),
+  'Facilities': universityKnowledgeBase.filter(item => item.category === 'Facilities'),
+  'Academic Calendar': universityKnowledgeBase.filter(item => item.category === 'Academic Calendar'),
+  'Student Conduct': universityKnowledgeBase.filter(item => item.category === 'Student Conduct'),
+};
+
+// Helper function to get all keywords for search optimization
+export const getAllKeywords = (): string[] => {
+  const allKeywords = universityKnowledgeBase.flatMap(item => item.keywords);
+  return [...new Set(allKeywords)]; // Remove duplicates
+};
+
+// Helper function to search by category
+export const getKnowledgeByCategory = (category: string): KnowledgeItem[] => {
+  return universityKnowledgeBase.filter(item => 
+    item.category.toLowerCase() === category.toLowerCase()
+  );
+};
+
+// Helper function to search by importance level
+export const getKnowledgeByImportance = (importance: 'high' | 'medium' | 'low'): KnowledgeItem[] => {
+  return universityKnowledgeBase.filter(item => item.importance === importance);
+};

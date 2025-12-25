@@ -85,7 +85,7 @@ export const Theme = {
     round: 999,
   },
   
-  // Shadow system - Depth and elevation
+  // Shadow system - Depth and elevation (Web-compatible)
   shadows: {
     sm: {
       shadowColor: '#000',
@@ -93,6 +93,8 @@ export const Theme = {
       shadowOpacity: 0.05,
       shadowRadius: 2,
       elevation: 1,
+      // Web-compatible boxShadow
+      boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
     },
     md: {
       shadowColor: '#000',
@@ -100,6 +102,8 @@ export const Theme = {
       shadowOpacity: 0.1,
       shadowRadius: 4,
       elevation: 3,
+      // Web-compatible boxShadow
+      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
     },
     lg: {
       shadowColor: '#000',
@@ -107,6 +111,8 @@ export const Theme = {
       shadowOpacity: 0.15,
       shadowRadius: 8,
       elevation: 5,
+      // Web-compatible boxShadow
+      boxShadow: '0 4px 8px rgba(0, 0, 0, 0.15)',
     },
     xl: {
       shadowColor: '#000',
@@ -114,6 +120,8 @@ export const Theme = {
       shadowOpacity: 0.2,
       shadowRadius: 16,
       elevation: 8,
+      // Web-compatible boxShadow
+      boxShadow: '0 8px 16px rgba(0, 0, 0, 0.2)',
     },
   },
   

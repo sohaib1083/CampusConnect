@@ -1,9 +1,9 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { StyleSheet, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import { StyleSheet, KeyboardAvoidingView, Platform, Alert, TouchableOpacity, Text } from 'react-native';
 import { GiftedChat, IMessage, Send, Bubble, InputToolbar } from 'react-native-gifted-chat';
 import { View } from '@/components/Themed';
 import { FontAwesome } from '@expo/vector-icons';
-import { askGroq, GroqMessage } from '@/services/groqApi';
+import { askGroq, GroqMessage, searchKnowledgeBase, getWelcomeMessage } from '@/services/groqApi';
 import { useAuth } from '@/contexts/SimpleFirebaseAuthContext';
 import { chatLoggingService } from '@/services/chatLoggingService';
 
@@ -19,13 +19,15 @@ function ChatScreen() {
   
   const { user, isAuthenticated } = useAuth();
 
-  // Initialize with welcome message
+  // Initialize with enhanced welcome message
   useEffect(() => {
+    const welcomeText = isAuthenticated 
+      ? `👋 Hello ${user?.displayName || 'Student'}! ${getWelcomeMessage()}`
+      : `👋 Hello! I'm CampusConnect AI, your personal student assistant.\n\nPlease login to start chatting and access personalized features.\n\n${getWelcomeMessage()}`;
+    
     const welcomeMessage: IMessage = {
       _id: 'welcome',
-      text: isAuthenticated 
-        ? `👋 Hello ${user?.displayName || 'Student'}! I'm CampusConnect AI, your personal student assistant.\n\nI can help you with:\n• Academic rules & policies\n• Registration dates & deadlines\n• Exam schedules & information\n• CGPA calculation & grading\n• General university guidance\n\nWhat would you like to know?`
-        : '👋 Hello! I\'m CampusConnect AI, your personal student assistant.\n\nPlease login to start chatting and access personalized features.\n\nI can help you with:\n• Academic rules & policies\n• Registration dates & deadlines\n• Exam schedules & information\n• CGPA calculation & grading\n• General university guidance',
+      text: welcomeText,
       createdAt: new Date(),
       user: {
         _id: 2,
@@ -90,7 +92,7 @@ function ChatScreen() {
           aiResponse,
           currentConversationId || undefined,
           {
-            model: 'llama-3.3-70b-versatile',
+            model: 'llama-3.1-8b-instant',
             responseTime,
           }
         );
@@ -145,6 +147,86 @@ function ChatScreen() {
       setIsTyping(false);
     }
   }, [conversationHistory]);
+
+  /**
+   * Quick knowledge base search (faster than full AI processing)
+   */
+  const handleQuickSearch = async () => {
+    Alert.prompt(
+      'Quick Search',
+      'What would you like to know about?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel'
+        },
+        {
+          text: 'Search',
+          onPress: async (query?: string) => {
+            if (!query || query.trim().length === 0) return;
+            
+            try {
+              setIsTyping(true);
+              
+              // Add user query to chat
+              const userMessage: IMessage = {
+                _id: Date.now().toString(),
+                text: query,
+                createdAt: new Date(),
+                user: {
+                  _id: 1,
+                },
+              };
+
+              setMessages(previousMessages =>
+                GiftedChat.append(previousMessages, [userMessage])
+              );
+              
+              // Get quick response from knowledge base
+              const quickResponse = await searchKnowledgeBase(query);
+              
+              // Add bot response
+              const botMessage: IMessage = {
+                _id: (Date.now() + 1).toString(),
+                text: `⚡ **Quick Search Result**\n\n${quickResponse}`,
+                createdAt: new Date(),
+                user: {
+                  _id: 2,
+                  name: 'CampusConnect AI',
+                  avatar: '🎓',
+                },
+              };
+
+              setMessages(previousMessages =>
+                GiftedChat.append(previousMessages, [botMessage])
+              );
+              
+            } catch (error) {
+              console.error('Quick search error:', error);
+              
+              const errorMessage: IMessage = {
+                _id: Date.now().toString(),
+                text: `⚡ Quick Search Error: ${error instanceof Error ? error.message : 'Failed to search knowledge base'}`,
+                createdAt: new Date(),
+                user: {
+                  _id: 2,
+                  name: 'CampusConnect AI',
+                  avatar: '🎓',
+                },
+              };
+
+              setMessages(previousMessages =>
+                GiftedChat.append(previousMessages, [errorMessage])
+              );
+            } finally {
+              setIsTyping(false);
+            }
+          }
+        }
+      ],
+      'plain-text'
+    );
+  };
 
   /**
    * Customize send button
@@ -209,6 +291,14 @@ function ChatScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Quick Search Button */}
+      <View style={styles.quickSearchContainer}>
+        <TouchableOpacity style={styles.quickSearchButton} onPress={handleQuickSearch}>
+          <FontAwesome name="search" size={14} color="#fff" />
+          <Text style={styles.quickButtonText}>Quick</Text>
+        </TouchableOpacity>
+      </View>
+
       <GiftedChat
         messages={messages}
         onSend={messages => onSend(messages)}
@@ -233,6 +323,31 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+  },
+  quickSearchContainer: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    zIndex: 1000,
+  },
+  quickSearchButton: {
+    backgroundColor: '#059669',
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  quickButtonText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '600',
+    marginLeft: 6,
   },
   sendButton: {
     justifyContent: 'center',
